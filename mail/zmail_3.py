@@ -72,14 +72,14 @@ def test_zmail():
         "port": 25,
         "sender": "test@xxxxxx.com",
         "receiver": [
-            "zhoujianchao@xxxxxx.com",
+            "xxx@xxxxxx.com",
         ],
         "timeout": 60
     }
     mail = ZMail(mail_conf)
     mail.set_subject('测试邮件')
     mail.set_text('这是测试邮件\n请勿回复')
-    mail.attach_csv('drools_to_pata.csv')
+    mail.attach_csv('dp.csv')
     mail.attach_png('cloud.png')
     mail.send_mail()
 
