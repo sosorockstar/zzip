@@ -115,7 +115,7 @@ def func7():
     lock = threading.Lock()
 
     def change_it(n):
-        nonlocal balance
+        global balance
         balance = balance + n
         balance = balance - n
 
