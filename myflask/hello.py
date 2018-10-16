@@ -4,9 +4,15 @@ from flask import Flask
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'Hello World'
+# 开启debug
+app.debug=True
+app.run()
+# app.run(debug=True)
+
+
+@app.route('/item/<int:id>')
+def print_item(id):
+    return 'The item {}'.format(id)
 
 
 if __name__ == '__main__':
