@@ -1,10 +1,14 @@
 import cropresize2
 import os
+import short_url
 import uuid
 
 from datetime import datetime
 from ext import db
+from flask import abort
 from PIL import Image
+from werkzeug.utils import cached_property
+
 
 class PasteFile(db.Model):
     __tablename__ = 'PasteFile'
@@ -62,3 +66,32 @@ class PasteFile(db.Model):
         filestat = os.stat(rst.path)
         rst.size = filestat.st_size
         return rst
+
+    @classmethod
+    def get_by_filehas(cls, filehash, code=404):
+        return cls.query.filter_by(filehash=filehash).first() or abort(code)
+
+    @property
+    def url_i(self):
+        return self.get_url('i')
+    
+    @property
+    def url_p(self):
+        return self.get_url('p')
+    
+    @property
+    def url_s(self):
+        return self.get_url('s', is_symlink=True)
+
+    @property
+    def url_d(self):
+        return self.get_url('d')
+
+    @cached_property
+    def symlink(self):
+        return short_url.encode_rul(self.id)
+
+    @classmethod
+    def get_by_symlink(cls, symlink, code=404):
+        id = short_url.decode_url(symlink)
+        return cls.query.filter_by(id=id).first() or abort(code)

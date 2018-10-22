@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, jsonify, render_template
+from flask import Flask, request, abort, jsonify, render_template, send_file
 
 from werkzeug import SharedDataMiddleware
 
@@ -43,3 +43,46 @@ def index():
             'quoteurl': paste_file.quoteurl
         })
     return render_template('index.html', **locals())
+
+@app.route('/r/<img_hash>')
+def rsize(img_hash):
+    w = request.['w']
+    h = request.['h']
+
+    old_paste = PasteFile.get_by_filehas(img_hash)
+    new_paste = PasteFile.rsize(old_path, w, h)
+
+    return new_paste.url_i
+
+ONE_MONTH = 60 * 60 * 24 * 30
+
+@app.route('/d/<filehash>', methods=['GET'])
+def download(filehash):
+    paste_file = PasteFile.get_by_filehash(filehash)
+
+    return send_file(open(paste_file.path, 'rb'),
+                    mimetype='application/octet-stream',
+                    cache_timeout=ONE_MONTH,
+                    as_attachment=True,
+                    attachment_filename=paste_file.filenameencode('utf-8'))
+
+@app.route('/p/<filehash>')
+def preview(filehash):
+    paste_file = PasteFile.get_by_filehash(filehash)
+
+    if not paste_file:
+        filepath = get_file_path(filehash)
+        if not(os.path.exists(filepath) and (not os.path.islink(filepath))):
+            return abort(404)
+        
+        paste_file = PasteFile.create_by_old_paste(filehash)
+        db.session.add(paste_file)
+        db.session.commit()
+
+    return render_template('success.html', p=paste_file)
+
+@app.route('/s/<symlink>')
+def s(symlink):
+    paste_file = PasteFile.get_by_symlink(symlink)
+    
+    return redirect(paste_file.rul_p)
